@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuel Mileage Tracker</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+
+<!-- Mobile Menu -->
+<button class="mobile-menu" id="mobileMenu">
+    <i class="fas fa-bars"></i>
+</button>
+
+<div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+            <i class="fas fa-gas-pump"></i>
+            <span>Fuel Tracker</span>
+        </div>
+
+        <nav>
+            <ul>
+                <li class="active" data-page="overview">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Overview</span>
+                </li>
+
+                <li data-page="records">
+                    <i class="fas fa-list"></i>
+                    <span>Records</span>
+                </li>
+
+                <li data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+            </ul>
+        </nav>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- OVERVIEW -->
+        <section id="overview" class="page active">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Fuel Mileage Overview</p>
+                </div>
+
+                <div class="vehicle-selector">
+
+                    <select id="vehicleSelect">
+                        <option>No Vehicle Added</option>
+                    </select>
+
+                    <button id="vehicleProfileBtn" class="icon-btn">
+                        <i class="fas fa-car"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Dashboard Cards -->
+
+            <div class="stats-grid">
+
+                <div class="card">
+                    <h3>Current Mileage</h3>
+                    <h2 id="currentMileage">0 KM/L</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Average Mileage</h3>
+                    <h2 id="averageMileage">0 KM/L</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Best Mileage</h3>
+                    <h2 id="bestMileage">0 KM/L</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Worst Mileage</h3>
+                    <h2 id="worstMileage">0 KM/L</h2>
+                </div>
+
+            </div>
+
+            <!-- Last 30 Days -->
+
+            <div class="section-title">
+                Last 30 Days Summary
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="card">
+                    <h3>Distance Travelled</h3>
+                    <h2 id="last30Distance">0 KM</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Fuel Used</h3>
+                    <h2 id="last30Fuel">0 L</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Fuel Cost</h3>
+                    <h2 id="last30Cost">₹0</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Total Records</h3>
+                    <h2 id="totalRecords">0</h2>
+                </div>
+
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="card">
+                    <h3>Cost Per KM</h3>
+                    <h2 id="costPerKm">₹0</h2>
+                </div>
+
+                <div class="card">
+                    <h3>KM Per Rupee</h3>
+                    <h2 id="kmPerRupee">0</h2>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- RECORDS -->
+
+        <section id="records" class="page">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Records</h1>
+                    <p>Manage Fuel Entries</p>
+                </div>
+
+                <div class="record-actions">
+
+                    <button class="btn btn-success" id="exportExcel">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+
+                    <button class="btn btn-danger" id="exportPDF">
+                        <i class="fas fa-file-pdf"></i>
+                        PDF
+                    </button>
+
+                    <button class="btn btn-primary" id="addRecordBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Record
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Date</th>
+                            <th>Vehicle</th>
+                            <th>Start KM</th>
+                            <th>End KM</th>
+                            <th>Distance</th>
+                            <th>Fuel</th>
+                            <th>Cost</th>
+                            <th>Mileage</th>
+                            <th>Cost/KM</th>
+                            <th>Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="recordsTable">
+
+                        <tr>
+                            <td colspan="10">
+                                No Records Found
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- SETTINGS -->
+
+        <section id="settings" class="page">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Settings</h1>
+                    <p>Backup & Restore</p>
+                </div>
+
+            </div>
+
+            <div class="settings-grid">
+
+                <div class="card">
+
+                    <h3>Export Data</h3>
+
+                    <button class="btn btn-primary" id="exportJson">
+                        Export JSON
+                    </button>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Import Data</h3>
+
+                    <input type="file"
+                    id="importJson"
+                    accept=".json">
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Danger Zone</h3>
+
+                    <button class="btn btn-danger"
+                    id="deleteAllData">
+                        Delete All Data
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ADD RECORD MODAL -->
+
+<div class="modal" id="recordModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>Add Fuel Record</h2>
+
+            <button class="closeModal">
+                ×
+            </button>
+
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Vehicle</label>
+                <select id="recordVehicle"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Starting KM</label>
+                <input type="number" id="startKm">
+            </div>
+
+            <div class="form-group">
+                <label>Ending KM</label>
+                <input type="number" id="endKm">
+            </div>
+
+            <div class="form-group">
+                <label>Fuel Litres</label>
+                <input type="number" step="0.01" id="fuelLitres">
+            </div>
+
+            <div class="form-group">
+                <label>Fuel Cost</label>
+                <input type="number" id="fuelCost">
+            </div>
+
+        </div>
+
+        <div class="calc-box">
+
+            <div>
+                Mileage :
+                <strong id="previewMileage">0 KM/L</strong>
+            </div>
+
+            <div>
+                Cost/KM :
+                <strong id="previewCostPerKm">₹0</strong>
+            </div>
+
+            <div>
+                KM/Rupee :
+                <strong id="previewKmPerRupee">0</strong>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button class="btn btn-secondary"
+            id="calculateBtn">
+                Calculate
+            </button>
+
+            <button class="btn btn-primary"
+            id="saveRecord">
+                Save Record
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- VEHICLE MODAL -->
+
+<div class="modal" id="vehicleModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>Vehicle Profile</h2>
+
+            <button class="closeVehicleModal">
+                ×
+            </button>
+
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Vehicle Name</label>
+                <input type="text" id="vehicleName">
+            </div>
+
+            <div class="form-group">
+                <label>Vehicle Number</label>
+                <input type="text" id="vehicleNumber">
+            </div>
+
+            <div class="form-group">
+                <label>Vehicle Type</label>
+
+                <select id="vehicleType">
+
+                    <option>Scooty</option>
+                    <option>Bike</option>
+                    <option>Car</option>
+                    <option>Van</option>
+                    <option>Bus</option>
+                    <option>Lorry</option>
+                    <option>Truck</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label>Fuel Type</label>
+
+                <select id="fuelType">
+
+                    <option>Petrol</option>
+                    <option>Diesel</option>
+                    <option>CNG</option>
+                    <option>Electric</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button class="btn btn-primary"
+            id="saveVehicle">
+                Save Vehicle
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
