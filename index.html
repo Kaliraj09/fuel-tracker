@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fuel Tracker</title>
+<title>FuelTrack Pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,20 +20,18 @@
   <div class="reminder-popup">
     <div class="reminder-header">
       <div class="reminder-icon"><i class="fas fa-bell"></i></div>
-      <h2>Reminders</h2>
+      <h2>Action Required</h2>
       <p id="reminderSubtitle">You have pending alerts</p>
     </div>
     <div class="reminder-list" id="reminderList"></div>
     <button class="btn-noted" id="reminderNoted">
-      <i class="fas fa-check-circle"></i> Noted
+      <i class="fas fa-check-circle"></i> Noted, Got It
     </button>
   </div>
 </div>
 
 <!-- Mobile Menu Button -->
-<button class="mobile-menu-btn" id="mobileMenuBtn">
-  <i class="fas fa-bars"></i>
-</button>
+<button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
 
 <div class="app-container">
 
@@ -45,231 +44,169 @@
 
     <nav class="sidebar-nav">
       <ul>
-        <li class="nav-item active" data-page="overview">
-          <i class="fas fa-chart-pie"></i><span>Overview</span>
-        </li>
-        <li class="nav-item" data-page="records">
-          <i class="fas fa-list-ul"></i><span>Records</span>
-        </li>
-        <li class="nav-item" data-page="vehicles">
-          <i class="fas fa-car"></i><span>Vehicles</span>
-        </li>
-        <li class="nav-item" data-page="reminders">
-          <i class="fas fa-bell"></i><span>Reminders</span>
-          <span class="badge" id="reminderBadge" style="display:none">!</span>
-        </li>
-        <li class="nav-item" data-page="settings">
-          <i class="fas fa-sliders"></i><span>Settings</span>
-        </li>
+        <li class="nav-item active" data-page="overview"><i class="fas fa-chart-pie"></i><span>Overview</span></li>
+        <li class="nav-item" data-page="records"><i class="fas fa-list-ul"></i><span>Records</span></li>
+        <li class="nav-item" data-page="expenses"><i class="fas fa-receipt"></i><span>Expense Log</span></li>
+        <li class="nav-item" data-page="vehicles"><i class="fas fa-car"></i><span>Vehicles</span></li>
+        <li class="nav-item" data-page="reminders"><i class="fas fa-bell"></i><span>Reminders</span><span class="badge" id="reminderBadge" style="display:none">!</span></li>
+        <li class="nav-item" data-page="settings"><i class="fas fa-sliders"></i><span>Settings</span></li>
       </ul>
     </nav>
 
-    <div class="sidebar-vehicle-box">
-      <label class="sv-label">Active Vehicle</label>
-      <select id="vehicleSelect" class="sv-select">
-        <option>No Vehicle</option>
-      </select>
+    <div class="sidebar-bottom">
+      <div class="sidebar-vehicle-box">
+        <label class="sv-label">Active Vehicle</label>
+        <select id="vehicleSelect" class="sv-select"><option>No Vehicle</option></select>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode">
+        <i class="fas fa-moon" id="themeIcon"></i>
+        <span id="themeLabel">Dark Mode</span>
+      </button>
     </div>
   </aside>
 
   <!-- MAIN -->
   <main class="main-content" id="mainContent">
 
-    <!-- ===== OVERVIEW PAGE ===== -->
+    <!-- ===== OVERVIEW ===== -->
     <section id="overview" class="page active">
       <div class="page-header">
         <div>
           <h1 class="page-title">Dashboard</h1>
           <p class="page-sub" id="activeVehicleLabel">Select a vehicle to begin</p>
         </div>
-        <button class="btn-icon-action" id="addRecordBtnOverview">
-          <i class="fas fa-plus"></i> Add Record
-        </button>
+        <button class="btn-primary" id="addRecordBtnOverview"><i class="fas fa-plus"></i> Add Record</button>
       </div>
 
+      <!-- Top KPI Strip -->
       <div class="stat-strip">
         <div class="stat-tile tile-blue">
-          <div class="tile-label">Current Mileage</div>
-          <div class="tile-value" id="currentMileage">— KM/L</div>
+          <div class="tile-icon"><i class="fas fa-tachometer-alt"></i></div>
+          <div class="tile-body">
+            <div class="tile-label">Current Mileage</div>
+            <div class="tile-value" id="currentMileage">— KM/L</div>
+          </div>
         </div>
         <div class="stat-tile tile-green">
-          <div class="tile-label">Average</div>
-          <div class="tile-value" id="averageMileage">— KM/L</div>
+          <div class="tile-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="tile-body">
+            <div class="tile-label">Average Mileage</div>
+            <div class="tile-value" id="averageMileage">— KM/L</div>
+          </div>
         </div>
         <div class="stat-tile tile-gold">
-          <div class="tile-label">Best</div>
-          <div class="tile-value" id="bestMileage">— KM/L</div>
+          <div class="tile-icon"><i class="fas fa-trophy"></i></div>
+          <div class="tile-body">
+            <div class="tile-label">Best Mileage</div>
+            <div class="tile-value" id="bestMileage">— KM/L</div>
+          </div>
         </div>
         <div class="stat-tile tile-red">
-          <div class="tile-label">Worst</div>
-          <div class="tile-value" id="worstMileage">— KM/L</div>
+          <div class="tile-icon"><i class="fas fa-arrow-trend-down"></i></div>
+          <div class="tile-body">
+            <div class="tile-label">Worst Mileage</div>
+            <div class="tile-value" id="worstMileage">— KM/L</div>
+          </div>
         </div>
       </div>
 
-      <div class="section-label">Last 30 Days</div>
+      <!-- Last 30 Days -->
+      <div class="section-label"><i class="fas fa-calendar-days"></i> Last 30 Days Summary</div>
       <div class="summary-cards">
-        <div class="s-card">
-          <div class="s-icon"><i class="fas fa-road"></i></div>
-          <div class="s-info">
-            <span class="s-val" id="last30Distance">0 KM</span>
-            <span class="s-lab">Distance</span>
-          </div>
-        </div>
-        <div class="s-card">
-          <div class="s-icon"><i class="fas fa-tint"></i></div>
-          <div class="s-info">
-            <span class="s-val" id="last30Fuel">0 L</span>
-            <span class="s-lab">Fuel Used</span>
-          </div>
-        </div>
-        <div class="s-card">
-          <div class="s-icon"><i class="fas fa-rupee-sign"></i></div>
-          <div class="s-info">
-            <span class="s-val" id="last30Cost">₹0</span>
-            <span class="s-lab">Fuel Cost</span>
-          </div>
-        </div>
-        <div class="s-card">
-          <div class="s-icon"><i class="fas fa-receipt"></i></div>
-          <div class="s-info">
-            <span class="s-val" id="totalRecords">0</span>
-            <span class="s-lab">Records</span>
-          </div>
-        </div>
-        <div class="s-card">
-          <div class="s-icon"><i class="fas fa-coins"></i></div>
-          <div class="s-info">
-            <span class="s-val" id="costPerKm">₹0</span>
-            <span class="s-lab">Cost / KM</span>
-          </div>
-        </div>
+        <div class="s-card"><div class="s-icon"><i class="fas fa-road"></i></div><div class="s-info"><span class="s-val" id="last30Distance">0 KM</span><span class="s-lab">Distance</span></div></div>
+        <div class="s-card"><div class="s-icon"><i class="fas fa-gauge"></i></div><div class="s-info"><span class="s-val" id="avgKmPerDay">0 KM</span><span class="s-lab">Avg / Day</span></div></div>
+        <div class="s-card"><div class="s-icon"><i class="fas fa-droplet"></i></div><div class="s-info"><span class="s-val" id="last30Fuel">0 L</span><span class="s-lab">Fuel Used</span></div></div>
+        <div class="s-card"><div class="s-icon"><i class="fas fa-indian-rupee-sign"></i></div><div class="s-info"><span class="s-val" id="last30Cost">₹0</span><span class="s-lab">Fuel Cost</span></div></div>
+        <div class="s-card"><div class="s-icon"><i class="fas fa-coins"></i></div><div class="s-info"><span class="s-val" id="costPerKm">₹0</span><span class="s-lab">Cost / KM</span></div></div>
+        <div class="s-card"><div class="s-icon"><i class="fas fa-screwdriver-wrench"></i></div><div class="s-info"><span class="s-val" id="totalExpenses">₹0</span><span class="s-lab">Vehicle Spent</span></div></div>
       </div>
 
-      <!-- CHARTS -->
+      <!-- Charts -->
       <div class="charts-grid">
         <div class="chart-card chart-wide">
-          <div class="chart-title">Mileage Trend</div>
+          <div class="chart-title"><i class="fas fa-chart-line"></i> Mileage Trend</div>
           <div class="chart-wrap"><canvas id="mileageChart"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title">Cost per KM</div>
+          <div class="chart-title"><i class="fas fa-indian-rupee-sign"></i> Cost per KM</div>
           <div class="chart-wrap"><canvas id="costChart"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title">Fuel Consumption</div>
+          <div class="chart-title"><i class="fas fa-droplet"></i> Fuel Consumed</div>
           <div class="chart-wrap"><canvas id="fuelChart"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- ===== RECORDS PAGE ===== -->
+    <!-- ===== RECORDS ===== -->
     <section id="records" class="page">
       <div class="page-header">
-        <div>
-          <h1 class="page-title">Records</h1>
-          <p class="page-sub">All fuel entries</p>
-        </div>
+        <div><h1 class="page-title">Records</h1><p class="page-sub">All fuel fill-ups</p></div>
         <div class="header-actions">
           <button class="btn-outline-green" id="exportExcel"><i class="fas fa-file-excel"></i> Excel</button>
           <button class="btn-outline-red" id="exportPDF"><i class="fas fa-file-pdf"></i> PDF</button>
           <button class="btn-primary" id="addRecordBtn"><i class="fas fa-plus"></i> Add</button>
         </div>
       </div>
-
-      <!-- Mobile cards view -->
       <div class="records-mobile" id="recordsMobile"></div>
-
-      <!-- Desktop table view -->
       <div class="table-wrapper">
         <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Vehicle</th>
-              <th>Start KM</th>
-              <th>End KM</th>
-              <th>Distance</th>
-              <th>Fuel (L)</th>
-              <th>Cost (₹)</th>
-              <th>Mileage</th>
-              <th>₹/KM</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="recordsTable">
-            <tr><td colspan="10" class="empty-row">No records yet</td></tr>
-          </tbody>
+          <thead><tr><th>Date</th><th>Vehicle</th><th>Start KM</th><th>End KM</th><th>Distance</th><th>Fuel (L)</th><th>Cost (₹)</th><th>Mileage</th><th>₹/KM</th><th></th></tr></thead>
+          <tbody id="recordsTable"><tr><td colspan="10" class="empty-row">No records yet</td></tr></tbody>
         </table>
       </div>
     </section>
 
-    <!-- ===== VEHICLES PAGE ===== -->
+    <!-- ===== EXPENSE LOG ===== -->
+    <section id="expenses" class="page">
+      <div class="page-header">
+        <div><h1 class="page-title">Expense Log</h1><p class="page-sub">Service, parts & other vehicle costs</p></div>
+        <button class="btn-primary" id="addExpenseBtn"><i class="fas fa-plus"></i> Add Expense</button>
+      </div>
+      <div class="expense-summary" id="expenseSummary"></div>
+      <div class="records-mobile" id="expenseMobile"></div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Date</th><th>Vehicle</th><th>Category</th><th>Description</th><th>Amount (₹)</th><th>KM Reading</th><th></th></tr></thead>
+          <tbody id="expenseTable"><tr><td colspan="7" class="empty-row">No expenses logged yet</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== VEHICLES ===== -->
     <section id="vehicles" class="page">
       <div class="page-header">
-        <div>
-          <h1 class="page-title">Vehicles</h1>
-          <p class="page-sub">Manage your fleet</p>
-        </div>
+        <div><h1 class="page-title">Vehicles</h1><p class="page-sub">Manage your fleet</p></div>
         <button class="btn-primary" id="addVehicleBtn"><i class="fas fa-plus"></i> Add Vehicle</button>
       </div>
-      <div class="vehicle-grid" id="vehicleGrid">
-        <div class="empty-vehicles">No vehicles added yet.<br>Click Add Vehicle to get started.</div>
-      </div>
+      <div class="vehicle-grid" id="vehicleGrid"><div class="empty-state">No vehicles added yet.</div></div>
     </section>
 
-    <!-- ===== REMINDERS PAGE ===== -->
+    <!-- ===== REMINDERS ===== -->
     <section id="reminders" class="page">
       <div class="page-header">
-        <div>
-          <h1 class="page-title">Reminders</h1>
-          <p class="page-sub">Service & document alerts</p>
-        </div>
+        <div><h1 class="page-title">Reminders</h1><p class="page-sub">Date & KM-based alerts</p></div>
         <button class="btn-primary" id="addReminderBtn"><i class="fas fa-plus"></i> Add Reminder</button>
       </div>
-      <div class="reminder-grid" id="reminderGrid">
-        <div class="empty-reminders">No reminders set yet.</div>
-      </div>
+      <div class="reminder-grid" id="reminderGrid"><div class="empty-state">No reminders set yet.</div></div>
     </section>
 
-    <!-- ===== SETTINGS PAGE ===== -->
+    <!-- ===== SETTINGS ===== -->
     <section id="settings" class="page">
       <div class="page-header">
-        <div>
-          <h1 class="page-title">Settings</h1>
-          <p class="page-sub">Backup & restore</p>
-        </div>
+        <div><h1 class="page-title">Settings</h1><p class="page-sub">Backup & restore data</p></div>
       </div>
       <div class="settings-list">
         <div class="setting-card">
-          <div class="setting-info">
-            <i class="fas fa-download"></i>
-            <div>
-              <strong>Export Backup</strong>
-              <p>Download all data as JSON</p>
-            </div>
-          </div>
+          <div class="setting-info"><i class="fas fa-download"></i><div><strong>Export Backup</strong><p>Download all data as JSON</p></div></div>
           <button class="btn-primary" id="exportJson">Export JSON</button>
         </div>
         <div class="setting-card">
-          <div class="setting-info">
-            <i class="fas fa-upload"></i>
-            <div>
-              <strong>Import Backup</strong>
-              <p>Restore from JSON file</p>
-            </div>
-          </div>
-          <label class="btn-primary" style="cursor:pointer">
-            Import JSON <input type="file" id="importJson" accept=".json" style="display:none">
-          </label>
+          <div class="setting-info"><i class="fas fa-upload"></i><div><strong>Import Backup</strong><p>Restore from JSON file</p></div></div>
+          <label class="btn-primary" style="cursor:pointer">Import JSON <input type="file" id="importJson" accept=".json" style="display:none"></label>
         </div>
         <div class="setting-card danger-card">
-          <div class="setting-info">
-            <i class="fas fa-trash-alt"></i>
-            <div>
-              <strong>Delete All Data</strong>
-              <p>Permanently remove everything</p>
-            </div>
-          </div>
+          <div class="setting-info"><i class="fas fa-trash-alt"></i><div><strong>Delete All Data</strong><p>Permanently remove everything</p></div></div>
           <button class="btn-danger" id="deleteAllData">Delete All</button>
         </div>
       </div>
@@ -281,47 +218,22 @@
 <!-- ===== ADD RECORD MODAL ===== -->
 <div class="modal" id="recordModal">
   <div class="modal-card">
-    <div class="modal-hd">
-      <h2>Add Fuel Record</h2>
-      <button class="modal-close" id="closeRecordModal">×</button>
-    </div>
+    <div class="modal-hd"><h2>Add Fuel Record</h2><button class="modal-close" id="closeRecordModal">×</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="fg">
-          <label>Vehicle</label>
-          <select id="recordVehicle"></select>
-        </div>
-        <div class="fg">
-          <label>Date</label>
-          <input type="date" id="recordDate">
-        </div>
-        <div class="fg">
-          <label>Starting KM</label>
-          <input type="number" id="startKm" placeholder="e.g. 15000">
-        </div>
-        <div class="fg">
-          <label>Ending KM</label>
-          <input type="number" id="endKm" placeholder="e.g. 15350">
-        </div>
-        <div class="fg">
-          <label>Fuel (Litres)</label>
-          <input type="number" step="0.01" id="fuelLitres" placeholder="e.g. 5.5">
-        </div>
-        <div class="fg">
-          <label>Fuel Cost (₹)</label>
-          <input type="number" id="fuelCost" placeholder="e.g. 600">
-        </div>
+        <div class="fg"><label>Vehicle</label><select id="recordVehicle"></select></div>
+        <div class="fg"><label>Date</label><input type="date" id="recordDate"></div>
+        <div class="fg"><label>Starting KM</label><input type="number" id="startKm" placeholder="e.g. 15000"></div>
+        <div class="fg"><label>Ending KM</label><input type="number" id="endKm" placeholder="e.g. 15350"></div>
+        <div class="fg"><label>Fuel (Litres)</label><input type="number" step="0.01" id="fuelLitres" placeholder="e.g. 5.5"></div>
+        <div class="fg"><label>Fuel Cost (₹)</label><input type="number" id="fuelCost" placeholder="e.g. 600"></div>
       </div>
       <div class="calc-preview">
-        <div class="cp-item">
-          <span>Mileage</span>
-          <strong id="previewMileage">— KM/L</strong>
-        </div>
-        <div class="cp-item">
-          <span>Cost / KM</span>
-          <strong id="previewCostPerKm">—</strong>
-        </div>
+        <div class="cp-item"><span>Mileage</span><strong id="previewMileage">— KM/L</strong></div>
+        <div class="cp-item"><span>Cost / KM</span><strong id="previewCostPerKm">—</strong></div>
       </div>
+      <!-- KM Reminder Alert inside record modal -->
+      <div class="km-reminder-alert" id="kmReminderAlert" style="display:none"></div>
     </div>
     <div class="modal-ft">
       <button class="btn-secondary" id="calculateBtn">Calculate</button>
@@ -333,40 +245,16 @@
 <!-- ===== VEHICLE MODAL ===== -->
 <div class="modal" id="vehicleModal">
   <div class="modal-card">
-    <div class="modal-hd">
-      <h2 id="vehicleModalTitle">Add Vehicle</h2>
-      <button class="modal-close" id="closeVehicleModal">×</button>
-    </div>
+    <div class="modal-hd"><h2 id="vehicleModalTitle">Add Vehicle</h2><button class="modal-close" id="closeVehicleModal">×</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="fg">
-          <label>Vehicle Name</label>
-          <input type="text" id="vehicleName" placeholder="e.g. My Bike">
+        <div class="fg"><label>Vehicle Name</label><input type="text" id="vehicleName" placeholder="e.g. My Bike"></div>
+        <div class="fg"><label>Registration No.</label><input type="text" id="vehicleNumber" placeholder="e.g. TN01AB1234"></div>
+        <div class="fg"><label>Vehicle Type</label>
+          <select id="vehicleType"><option>Scooty</option><option>Bike</option><option>Car</option><option>Van</option><option>Bus</option><option>Lorry</option><option>Truck</option></select>
         </div>
-        <div class="fg">
-          <label>Registration No.</label>
-          <input type="text" id="vehicleNumber" placeholder="e.g. TN01AB1234">
-        </div>
-        <div class="fg">
-          <label>Vehicle Type</label>
-          <select id="vehicleType">
-            <option>Scooty</option>
-            <option>Bike</option>
-            <option>Car</option>
-            <option>Van</option>
-            <option>Bus</option>
-            <option>Lorry</option>
-            <option>Truck</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Fuel Type</label>
-          <select id="fuelType">
-            <option>Petrol</option>
-            <option>Diesel</option>
-            <option>CNG</option>
-            <option>Electric</option>
-          </select>
+        <div class="fg"><label>Fuel Type</label>
+          <select id="fuelType"><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option></select>
         </div>
       </div>
     </div>
@@ -380,39 +268,39 @@
 <!-- ===== REMINDER MODAL ===== -->
 <div class="modal" id="reminderModal">
   <div class="modal-card">
-    <div class="modal-hd">
-      <h2>Add Reminder</h2>
-      <button class="modal-close" id="closeReminderModal">×</button>
-    </div>
+    <div class="modal-hd"><h2>Add Reminder</h2><button class="modal-close" id="closeReminderModal">×</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="fg">
-          <label>Vehicle</label>
-          <select id="reminderVehicle"></select>
-        </div>
-        <div class="fg">
-          <label>Reminder Type</label>
+        <div class="fg"><label>Vehicle</label><select id="reminderVehicle"></select></div>
+        <div class="fg"><label>Reminder Type</label>
           <select id="reminderType">
             <option value="service">Service</option>
             <option value="insurance">Insurance Expiry</option>
-            <option value="pollution">Pollution Certificate (PUC)</option>
+            <option value="pollution">PUC Certificate</option>
             <option value="tyre">Tyre Change</option>
             <option value="oil">Oil Change</option>
             <option value="other">Other</option>
           </select>
         </div>
-        <div class="fg">
-          <label>Due Date</label>
-          <input type="date" id="reminderDate">
+        <!-- Trigger mode -->
+        <div class="fg" style="grid-column:1/-1">
+          <label>Trigger By</label>
+          <div class="toggle-group">
+            <button class="tg-btn active" id="triggerByDate" data-mode="date"><i class="fas fa-calendar"></i> Date</button>
+            <button class="tg-btn" id="triggerByKm" data-mode="km"><i class="fas fa-road"></i> Kilometre</button>
+          </div>
         </div>
-        <div class="fg">
-          <label>Note (optional)</label>
-          <input type="text" id="reminderNote" placeholder="e.g. Change at Lalitha service">
+        <!-- Date fields -->
+        <div id="dateFields" class="fg-group">
+          <div class="fg"><label>Due Date</label><input type="date" id="reminderDate"></div>
+          <div class="fg"><label>Warn me (days before)</label><input type="number" id="reminderDaysBefore" value="7" min="1" max="90"></div>
         </div>
-        <div class="fg">
-          <label>Warn me (days before)</label>
-          <input type="number" id="reminderDaysBefore" value="7" min="1" max="90">
+        <!-- KM fields -->
+        <div id="kmFields" class="fg-group" style="display:none">
+          <div class="fg"><label>Due at KM Reading</label><input type="number" id="reminderKm" placeholder="e.g. 49000"></div>
+          <div class="fg"><label>Warn me (KM before)</label><input type="number" id="reminderKmBefore" value="200" min="10" max="5000"></div>
         </div>
+        <div class="fg" style="grid-column:1/-1"><label>Note (optional)</label><input type="text" id="reminderNote" placeholder="e.g. Change at Lalitha Service"></div>
       </div>
     </div>
     <div class="modal-ft">
@@ -422,8 +310,38 @@
   </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- ===== EXPENSE MODAL ===== -->
+<div class="modal" id="expenseModal">
+  <div class="modal-card">
+    <div class="modal-hd"><h2>Add Expense</h2><button class="modal-close" id="closeExpenseModal">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label>Vehicle</label><select id="expenseVehicle"></select></div>
+        <div class="fg"><label>Date</label><input type="date" id="expenseDate"></div>
+        <div class="fg"><label>Category</label>
+          <select id="expenseCategory">
+            <option value="service">Service</option>
+            <option value="parts">Parts Replacement</option>
+            <option value="tyre">Tyre</option>
+            <option value="battery">Battery</option>
+            <option value="insurance">Insurance</option>
+            <option value="pollution">PUC / Pollution</option>
+            <option value="cleaning">Cleaning / Wash</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="fg"><label>Amount (₹)</label><input type="number" id="expenseAmount" placeholder="e.g. 1500"></div>
+        <div class="fg"><label>KM Reading (optional)</label><input type="number" id="expenseKm" placeholder="e.g. 48500"></div>
+        <div class="fg"><label>Description</label><input type="text" id="expenseDesc" placeholder="e.g. Full service at Yamaha"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-secondary" id="cancelExpenseModal">Cancel</button>
+      <button class="btn-primary" id="saveExpense">Save Expense</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
